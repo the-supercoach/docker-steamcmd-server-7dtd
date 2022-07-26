@@ -60,7 +60,7 @@ if grep -rq '<property name="SaveGameFolder"' ${SERVER_DIR}/${SERVERCONFIG}; the
     if grep -rq '<!-- <property name="SaveGameFolder"' ${SERVER_DIR}/${SERVERCONFIG}; then
         echo "---Moving SaveGameFolder location---"
         sed -i '/<!-- <property name="SaveGameFolder"/c\\t<property name="SaveGameFolder"\t\t\t\t\tvalue="/serverdata/serverfiles/Saves" />' ${SERVER_DIR}/${SERVERCONFIG}
-        elif grep -rq 'value="/serverdata/serverfiles/Saves"' ${SERVER_DIR}/${SERVERCONFIG}; then
+    elif grep -rq 'value="/serverdata/serverfiles/Saves"' ${SERVER_DIR}/${SERVERCONFIG}; then
         echo "---SaveGameFolder location correct---"
     fi
 else
@@ -153,31 +153,29 @@ fi
 
 echo "---Start Server---"
 cd ${SERVER_DIR}
-if [ "${ENABLE_BEPINEX}" == "true" ]; then
-    if [ -f ${SERVER_DIR}/run_bepinex_server.sh ]; then
-        ${SERVER_DIR}/run_bepinex_server.sh
+if [ -f ${SERVER_DIR}/run_bepinex_server.sh ]; then
+    ${SERVER_DIR}/run_bepinex_server.sh
+elif [ "${ENABLE_BEPINEX}" == "true" ]; then
+    echo "---with BepInEx---"
+    echo
+    echo "---https://github.com/BepInEx/BepInEx---"
+    echo
+    export DOORSTOP_ENABLE=TRUE
+    export DOORSTOP_INVOKE_DLL_PATH=${SERVER_DIR}/BepInEx/core/BepInEx.Preloader.dll
+    if [ ! ${DOORSTOP_CORLIB_OVERRIDE_PATH+x} ]; then
+        export DOORSTOP_CORLIB_OVERRIDE_PATH=${SERVER_DIR}/unstripped_corlib
+    fi
+    export LD_LIBRARY_PATH="${SERVER_DIR}/doorstop_libs":$LD_LIBRARY_PATH
+    export LD_PRELOAD=libdoorstop_x64.so:$LD_PRELOAD
+    export DYLD_LIBRARY_PATH="${SERVER_DIR}/doorstop_libs"
+    export DYLD_INSERT_LIBRARIES="${SERVER_DIR}/libdoorstop_x64.so"
+    export templdpath="$LD_LIBRARY_PATH"
+    export LD_LIBRARY_PATH=${SERVER_DIR}/linux64:"$LD_LIBRARY_PATH"
+    export SteamAppId=251570
+    if [ "${LOG_TIMESTAMP}" != "true" ]; then
+        ${SERVER_DIR}/7DaysToDieServer.x86_64 -configfile=${SERVERCONFIG} ${GAME_PARAMS}
     else
-        echo "---with BepInEx---"
-        echo
-        echo "---https://github.com/BepInEx/BepInEx---"
-        echo
-        export DOORSTOP_ENABLE=TRUE
-        export DOORSTOP_INVOKE_DLL_PATH=${SERVER_DIR}/BepInEx/core/BepInEx.Preloader.dll
-        if [ ! ${DOORSTOP_CORLIB_OVERRIDE_PATH+x} ]; then
-            export DOORSTOP_CORLIB_OVERRIDE_PATH=${SERVER_DIR}/unstripped_corlib
-        fi
-        export LD_LIBRARY_PATH="${SERVER_DIR}/doorstop_libs":$LD_LIBRARY_PATH
-        export LD_PRELOAD=libdoorstop_x64.so:$LD_PRELOAD
-        export DYLD_LIBRARY_PATH="${SERVER_DIR}/doorstop_libs"
-        export DYLD_INSERT_LIBRARIES="${SERVER_DIR}/libdoorstop_x64.so"
-        export templdpath="$LD_LIBRARY_PATH"
-        export LD_LIBRARY_PATH=${SERVER_DIR}/linux64:"$LD_LIBRARY_PATH"
-        export SteamAppId=251570
-        if [ "${LOG_TIMESTAMP}" != "true" ]; then
-            ${SERVER_DIR}/7DaysToDieServer.x86_64 -configfile=${SERVERCONFIG} ${GAME_PARAMS}
-        else
-            ${SERVER_DIR}/7DaysToDieServer.x86_64 -configfile=${SERVERCONFIG} -logfile 7DaysToDie_Data/output_log_$(date +"%F_%H.%M.%S").txt ${GAME_PARAMS}
-        fi
+        ${SERVER_DIR}/7DaysToDieServer.x86_64 -configfile=${SERVERCONFIG} -logfile 7DaysToDie_Data/output_log_$(date +"%F_%H.%M.%S").txt ${GAME_PARAMS}
     fi
 else
     if [ "${LOG_TIMESTAMP}" != "true" ]; then
