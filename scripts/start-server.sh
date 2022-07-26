@@ -135,7 +135,7 @@ if [ "${ENABLE_BEPINEX}" == "true" ]; then
             echo "---BepInEx v$CUR_V up-to-date---"
         fi
     else
-        echo "---Customer BepInEx script detected, skipping built-in procedures---"
+        echo "---Custom BepInEx script detected, skipping built-in procedures---"
     fi
 fi
 
