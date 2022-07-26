@@ -3,7 +3,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${SERVER_DIR}
 
 if [ ! -f ${STEAMCMD_DIR}/steamcmd.sh ]; then
     echo "SteamCMD not found!"
-    wget -q -O ${STEAMCMD_DIR}/steamcmd_linux.tar.gz http://media.steampowered.com/client/steamcmd_linux.tar.gz 
+    wget -q -O ${STEAMCMD_DIR}/steamcmd_linux.tar.gz http://media.steampowered.com/client/steamcmd_linux.tar.gz
     tar --directory ${STEAMCMD_DIR} -xvzf /serverdata/steamcmd/steamcmd_linux.tar.gz
     rm ${STEAMCMD_DIR}/steamcmd_linux.tar.gz
 fi
@@ -22,7 +22,7 @@ fi
 echo "---Update Server---"
 if [ "${USERNAME}" == "" ]; then
     if [ "${VALIDATE}" == "true" ]; then
-    	echo "---Validating installation---"
+        echo "---Validating installation---"
         ${STEAMCMD_DIR}/steamcmd.sh \
         +force_install_dir ${SERVER_DIR} \
         +login anonymous \
@@ -37,7 +37,7 @@ if [ "${USERNAME}" == "" ]; then
     fi
 else
     if [ "${VALIDATE}" == "true" ]; then
-    	echo "---Validating installation---"
+        echo "---Validating installation---"
         ${STEAMCMD_DIR}/steamcmd.sh \
         +force_install_dir ${SERVER_DIR} \
         +login ${USERNAME} ${PASSWRD} \
@@ -60,7 +60,7 @@ if grep -rq '<property name="SaveGameFolder"' ${SERVER_DIR}/${SERVERCONFIG}; the
     if grep -rq '<!-- <property name="SaveGameFolder"' ${SERVER_DIR}/${SERVERCONFIG}; then
         echo "---Moving SaveGameFolder location---"
         sed -i '/<!-- <property name="SaveGameFolder"/c\\t<property name="SaveGameFolder"\t\t\t\t\tvalue="/serverdata/serverfiles/Saves" />' ${SERVER_DIR}/${SERVERCONFIG}
-    elif grep -rq 'value="/serverdata/serverfiles/Saves"' ${SERVER_DIR}/${SERVERCONFIG}; then
+        elif grep -rq 'value="/serverdata/serverfiles/Saves"' ${SERVER_DIR}/${SERVERCONFIG}; then
         echo "---SaveGameFolder location correct---"
     fi
 else
@@ -75,7 +75,7 @@ if grep -rq '<property name="UserDataFolder"' ${SERVER_DIR}/${SERVERCONFIG}; the
     if grep -rq '<!-- <property name="UserDataFolder"' ${SERVER_DIR}/${SERVERCONFIG}; then
         echo "---Moving UserDataFolder location---"
         sed -i '/<!-- <property name="UserDataFolder"/c\\t<property name="UserDataFolder"\t\t\t\t\tvalue="/serverdata/serverfiles/User" />' ${SERVER_DIR}/${SERVERCONFIG}
-    elif grep -rq 'value="/serverdata/serverfiles/User"' ${SERVER_DIR}/${SERVERCONFIG}; then
+        elif grep -rq 'value="/serverdata/serverfiles/User"' ${SERVER_DIR}/${SERVERCONFIG}; then
         echo "---UserDataFolder location correct---"
     fi
 else
@@ -93,11 +93,11 @@ if [ "${ENABLE_BEPINEX}" == "true" ]; then
         echo "---Please try to run the Container without BepInEx, putting Container into sleep mode!---"
         sleep infinity
     fi
-
+    
     if [ -f ${SERVER_DIR}/BepInEx.zip ]; then
-	    rm -rf ${SERVER_DIR}/BepInEx.zip
+        rm -rf ${SERVER_DIR}/BepInEx.zip
     fi
-
+    
     echo "---BepInEx Version Check---"
     echo
     echo "---https://github.com/BepInEx/BepInEx---"
@@ -112,12 +112,12 @@ if [ "${ENABLE_BEPINEX}" == "true" ]; then
             sleep infinity
         fi
         unzip -o ${SERVER_DIR}/BepInEx.zip -d ${SERVER_DIR}
-	    touch ${SERVER_DIR}/BepInEx-$LAT_V
+        touch ${SERVER_DIR}/BepInEx-$LAT_V
         rm -rf ${SERVER_DIR}/BepInEx.zip
-    elif [ "$CUR_V" != "$LAT_V" ]; then
+        elif [ "$CUR_V" != "$LAT_V" ]; then
         echo "---Version missmatch, BepInEx v$CUR_V installed, downloading and installing v$LAT_V...---"
         cd ${SERVER_DIR}
-    	rm -rf ${SERVER_DIR}/BepInEx-$CUR_V
+        rm -rf ${SERVER_DIR}/BepInEx-$CUR_V
         mkdir /tmp/Backup
         cp -R ${SERVER_DIR}/BepInEx/config /tmp/Backup/ 2>/dev/null
         if wget -q -nc --show-progress --progress=bar:force:noscroll -O ${SERVER_DIR}/BepInEx.zip "https://github.com/BepInEx/BepInEx/releases/download/v${LAT_V}/BepInEx_unix_${LAT_V}.0.zip" ; then
@@ -127,10 +127,10 @@ if [ "${ENABLE_BEPINEX}" == "true" ]; then
             sleep infinity
         fi
         unzip -o ${SERVER_DIR}/BepInEx.zip -d ${SERVER_DIR}
-	    touch ${SERVER_DIR}/BepInEx-$LAT_V
+        touch ${SERVER_DIR}/BepInEx-$LAT_V
         cp -R /tmp/Backup/config ${SERVER_DIR}/BepInEx/ 2>/dev/null
         rm -rf ${SERVER_DIR}/BepInEx.zip /tmp/Backup
-    elif [ "${CUR_V}" == "${LAT_V}" ]; then
+        elif [ "${CUR_V}" == "${LAT_V}" ]; then
         echo "---BepInEx v$CUR_V up-to-date---"
     fi
 fi
@@ -150,26 +150,30 @@ fi
 echo "---Start Server---"
 cd ${SERVER_DIR}
 if [ "${ENABLE_BEPINEX}" == "true" ]; then
-    echo "---with BepInEx---"
-    echo
-    echo "---https://github.com/BepInEx/BepInEx---"
-    echo
-    export DOORSTOP_ENABLE=TRUE
-    export DOORSTOP_INVOKE_DLL_PATH=${SERVER_DIR}/BepInEx/core/BepInEx.Preloader.dll
-    if [ ! ${DOORSTOP_CORLIB_OVERRIDE_PATH+x} ]; then
-      export DOORSTOP_CORLIB_OVERRIDE_PATH=${SERVER_DIR}/unstripped_corlib
-    fi
-    export LD_LIBRARY_PATH="${SERVER_DIR}/doorstop_libs":$LD_LIBRARY_PATH
-    export LD_PRELOAD=libdoorstop_x64.so:$LD_PRELOAD
-    export DYLD_LIBRARY_PATH="${SERVER_DIR}/doorstop_libs"
-    export DYLD_INSERT_LIBRARIES="${SERVER_DIR}/libdoorstop_x64.so"
-    export templdpath="$LD_LIBRARY_PATH"
-    export LD_LIBRARY_PATH=${SERVER_DIR}/linux64:"$LD_LIBRARY_PATH"
-    export SteamAppId=251570
-    if [ "${LOG_TIMESTAMP}" != "true" ]; then
-        ${SERVER_DIR}/7DaysToDieServer.x86_64 -configfile=${SERVERCONFIG} ${GAME_PARAMS}
+    if [ -f ${SERVER_DIR}/run_bepinex_server.sh ]; then
+        ${SERVER_DIR}/run_bepinex_server.sh
     else
-        ${SERVER_DIR}/7DaysToDieServer.x86_64 -configfile=${SERVERCONFIG} -logfile 7DaysToDie_Data/output_log_$(date +"%F_%H.%M.%S").txt ${GAME_PARAMS}
+        echo "---with BepInEx---"
+        echo
+        echo "---https://github.com/BepInEx/BepInEx---"
+        echo
+        export DOORSTOP_ENABLE=TRUE
+        export DOORSTOP_INVOKE_DLL_PATH=${SERVER_DIR}/BepInEx/core/BepInEx.Preloader.dll
+        if [ ! ${DOORSTOP_CORLIB_OVERRIDE_PATH+x} ]; then
+            export DOORSTOP_CORLIB_OVERRIDE_PATH=${SERVER_DIR}/unstripped_corlib
+        fi
+        export LD_LIBRARY_PATH="${SERVER_DIR}/doorstop_libs":$LD_LIBRARY_PATH
+        export LD_PRELOAD=libdoorstop_x64.so:$LD_PRELOAD
+        export DYLD_LIBRARY_PATH="${SERVER_DIR}/doorstop_libs"
+        export DYLD_INSERT_LIBRARIES="${SERVER_DIR}/libdoorstop_x64.so"
+        export templdpath="$LD_LIBRARY_PATH"
+        export LD_LIBRARY_PATH=${SERVER_DIR}/linux64:"$LD_LIBRARY_PATH"
+        export SteamAppId=251570
+        if [ "${LOG_TIMESTAMP}" != "true" ]; then
+            ${SERVER_DIR}/7DaysToDieServer.x86_64 -configfile=${SERVERCONFIG} ${GAME_PARAMS}
+        else
+            ${SERVER_DIR}/7DaysToDieServer.x86_64 -configfile=${SERVERCONFIG} -logfile 7DaysToDie_Data/output_log_$(date +"%F_%H.%M.%S").txt ${GAME_PARAMS}
+        fi
     fi
 else
     if [ "${LOG_TIMESTAMP}" != "true" ]; then
