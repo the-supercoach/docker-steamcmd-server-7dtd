@@ -86,52 +86,56 @@ echo "---UserDataFolder location found---"
 
 if [ "${ENABLE_BEPINEX}" == "true" ]; then
     echo "---BepInEx enabled!---"
-    CUR_V="$(find ${SERVER_DIR} -maxdepth 1 -name "BepInEx-*" | cut -d '-' -f2)"
-    LAT_V="$(wget -qO- https://api.github.com/repos/BepInEx/BepInEx/releases/latest | grep tag_name | cut -d '"' -f4 | cut -d 'v' -f2)"
-    if [ -z "${LAT_V}" ] && [ -z "${CUR_V}" ]; then
-        echo "---Can't get latest version of BepInEx!---"
-        echo "---Please try to run the Container without BepInEx, putting Container into sleep mode!---"
-        sleep infinity
-    fi
-    
-    if [ -f ${SERVER_DIR}/BepInEx.zip ]; then
-        rm -rf ${SERVER_DIR}/BepInEx.zip
-    fi
-    
-    echo "---BepInEx Version Check---"
-    echo
-    echo "---https://github.com/BepInEx/BepInEx---"
-    echo
-    if [ -z "${CUR_V}" ]; then
-        echo "---BepInEx for Valheim not found, downloading and installing v$LAT_V...---"
-        cd ${SERVER_DIR}
-        if wget -q -nc --show-progress --progress=bar:force:noscroll -O ${SERVER_DIR}/BepInEx.zip "https://github.com/BepInEx/BepInEx/releases/download/v${LAT_V}/BepInEx_unix_${LAT_V}.0.zip" ; then
-            echo "---Successfully downloaded BepInEx v$LAT_V---"
-        else
-            echo "---Something went wrong, can't download BepInEx v$LAT_V, putting container into sleep mode!---"
+    if [ ! -f ${SERVER_DIR}/run_bepinex_server.sh ]; then
+        CUR_V="$(find ${SERVER_DIR} -maxdepth 1 -name "BepInEx-*" | cut -d '-' -f2)"
+        LAT_V="$(wget -qO- https://api.github.com/repos/BepInEx/BepInEx/releases/latest | grep tag_name | cut -d '"' -f4 | cut -d 'v' -f2)"
+        if [ -z "${LAT_V}" ] && [ -z "${CUR_V}" ]; then
+            echo "---Can't get latest version of BepInEx!---"
+            echo "---Please try to run the Container without BepInEx, putting Container into sleep mode!---"
             sleep infinity
         fi
-        unzip -o ${SERVER_DIR}/BepInEx.zip -d ${SERVER_DIR}
-        touch ${SERVER_DIR}/BepInEx-$LAT_V
-        rm -rf ${SERVER_DIR}/BepInEx.zip
-        elif [ "$CUR_V" != "$LAT_V" ]; then
-        echo "---Version missmatch, BepInEx v$CUR_V installed, downloading and installing v$LAT_V...---"
-        cd ${SERVER_DIR}
-        rm -rf ${SERVER_DIR}/BepInEx-$CUR_V
-        mkdir /tmp/Backup
-        cp -R ${SERVER_DIR}/BepInEx/config /tmp/Backup/ 2>/dev/null
-        if wget -q -nc --show-progress --progress=bar:force:noscroll -O ${SERVER_DIR}/BepInEx.zip "https://github.com/BepInEx/BepInEx/releases/download/v${LAT_V}/BepInEx_unix_${LAT_V}.0.zip" ; then
-            echo "---Successfully downloaded BepInEx v$LAT_V---"
-        else
-            echo "---Something went wrong, can't download BepInEx v$LAT_V, putting container into sleep mode!---"
-            sleep infinity
+        
+        if [ -f ${SERVER_DIR}/BepInEx.zip ]; then
+            rm -rf ${SERVER_DIR}/BepInEx.zip
         fi
-        unzip -o ${SERVER_DIR}/BepInEx.zip -d ${SERVER_DIR}
-        touch ${SERVER_DIR}/BepInEx-$LAT_V
-        cp -R /tmp/Backup/config ${SERVER_DIR}/BepInEx/ 2>/dev/null
-        rm -rf ${SERVER_DIR}/BepInEx.zip /tmp/Backup
-        elif [ "${CUR_V}" == "${LAT_V}" ]; then
-        echo "---BepInEx v$CUR_V up-to-date---"
+        
+        echo "---BepInEx Version Check---"
+        echo
+        echo "---https://github.com/BepInEx/BepInEx---"
+        echo
+        if [ -z "${CUR_V}" ]; then
+            echo "---BepInEx for Valheim not found, downloading and installing v$LAT_V...---"
+            cd ${SERVER_DIR}
+            if wget -q -nc --show-progress --progress=bar:force:noscroll -O ${SERVER_DIR}/BepInEx.zip "https://github.com/BepInEx/BepInEx/releases/download/v${LAT_V}/BepInEx_unix_${LAT_V}.0.zip" ; then
+                echo "---Successfully downloaded BepInEx v$LAT_V---"
+            else
+                echo "---Something went wrong, can't download BepInEx v$LAT_V, putting container into sleep mode!---"
+                sleep infinity
+            fi
+            unzip -o ${SERVER_DIR}/BepInEx.zip -d ${SERVER_DIR}
+            touch ${SERVER_DIR}/BepInEx-$LAT_V
+            rm -rf ${SERVER_DIR}/BepInEx.zip
+            elif [ "$CUR_V" != "$LAT_V" ]; then
+            echo "---Version missmatch, BepInEx v$CUR_V installed, downloading and installing v$LAT_V...---"
+            cd ${SERVER_DIR}
+            rm -rf ${SERVER_DIR}/BepInEx-$CUR_V
+            mkdir /tmp/Backup
+            cp -R ${SERVER_DIR}/BepInEx/config /tmp/Backup/ 2>/dev/null
+            if wget -q -nc --show-progress --progress=bar:force:noscroll -O ${SERVER_DIR}/BepInEx.zip "https://github.com/BepInEx/BepInEx/releases/download/v${LAT_V}/BepInEx_unix_${LAT_V}.0.zip" ; then
+                echo "---Successfully downloaded BepInEx v$LAT_V---"
+            else
+                echo "---Something went wrong, can't download BepInEx v$LAT_V, putting container into sleep mode!---"
+                sleep infinity
+            fi
+            unzip -o ${SERVER_DIR}/BepInEx.zip -d ${SERVER_DIR}
+            touch ${SERVER_DIR}/BepInEx-$LAT_V
+            cp -R /tmp/Backup/config ${SERVER_DIR}/BepInEx/ 2>/dev/null
+            rm -rf ${SERVER_DIR}/BepInEx.zip /tmp/Backup
+            elif [ "${CUR_V}" == "${LAT_V}" ]; then
+            echo "---BepInEx v$CUR_V up-to-date---"
+        fi
+    else
+        echo "---Customer BepInEx script detected, skipping built-in procedures---"
     fi
 fi
 
