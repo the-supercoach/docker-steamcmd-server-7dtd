@@ -84,9 +84,13 @@ else
 fi
 echo "---UserDataFolder location found---"
 
+# most mod expect server config to be at serverconfig.xml, so copy config to there or whatever is configured in the env vars
+cp ${SERVER_DIR}/${SERVERCONFIG} ${SERVER_DIR}/${MODCONFIG}
+echo "---Copied ${SERVERCONFIG} to ${MODCONFIG}---"
+
 if [ "${ENABLE_BEPINEX}" == "true" ]; then
     echo "---BepInEx enabled!---"
-    if [ ! -f ${SERVER_DIR}/run_bepinex_server.sh ]; then
+    if [ ! -f ${SERVER_DIR}/run_bepinex_server.sh ]; then # skips this bit for custom bepinex installs
         CUR_V="$(find ${SERVER_DIR} -maxdepth 1 -name "BepInEx-*" | cut -d '-' -f2)"
         LAT_V="$(wget -qO- https://api.github.com/repos/BepInEx/BepInEx/releases/latest | grep tag_name | cut -d '"' -f4 | cut -d 'v' -f2)"
         if [ -z "${LAT_V}" ] && [ -z "${CUR_V}" ]; then
